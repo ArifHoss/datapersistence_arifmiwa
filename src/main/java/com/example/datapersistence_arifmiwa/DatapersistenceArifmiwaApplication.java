@@ -1,7 +1,7 @@
 package com.example.datapersistence_arifmiwa;
 
 import com.example.datapersistence_arifmiwa.model.Customer;
-import com.example.datapersistence_arifmiwa.service.CustomerService;
+import com.example.datapersistence_arifmiwa.service.CustomerRepositoryImplementation;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,10 +12,10 @@ import java.util.Scanner;
 @SpringBootApplication
 public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
     private static final Scanner scanner = new Scanner(System.in);
-    private final CustomerService customerService;
+    private final CustomerRepositoryImplementation customerRepositoryImplementation;
 
-    public DatapersistenceArifmiwaApplication(CustomerService customerService) {
-        this.customerService = customerService;
+    public DatapersistenceArifmiwaApplication(CustomerRepositoryImplementation customerRepositoryImplementation) {
+        this.customerRepositoryImplementation = customerRepositoryImplementation;
     }
 
     public static void main(String[] args) {
@@ -47,21 +47,21 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
 
             switch (choice) {
                 case 1:
-                    List<Customer> customers = customerService.findAll();
+                    List<Customer> customers = customerRepositoryImplementation.findAll();
                     System.out.println("****************************************");
                     customers.forEach(System.out::println);
                     break;
                 case 2:
                     System.out.print("Enter customer ID: ");
                     int id = scanner.nextInt();
-                    Customer customer = customerService.findById(id);
+                    Customer customer = customerRepositoryImplementation.findById(id);
                     System.out.println("****************************************");
                     System.out.println(customer);
                     break;
                 case 3:
                     System.out.print("Enter customer name: ");
                     String name = scanner.nextLine();
-                    customer = customerService.findByName(name);
+                    customer = customerRepositoryImplementation.findByName(name);
                     System.out.println("****************************************");
                     System.out.println(customer);
                     break;
@@ -70,7 +70,7 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                     int limit = scanner.nextInt();
                     System.out.print("Enter offset: ");
                     int offset = scanner.nextInt();
-                    customers = customerService.findAllWithLimit(limit, offset);
+                    customers = customerRepositoryImplementation.findAllWithLimit(limit, offset);
                     System.out.println("****************************************");
                     customers.forEach(System.out::println);
                     break;
@@ -98,7 +98,7 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                     System.out.print("Enter email: ");
                     String email = scanner.nextLine();
                     Customer newCustomer = new Customer(0, firstName, lastName, company, address, city, state, country, postalCode, phone, fax, email);
-                    customerService.save(newCustomer);
+                    customerRepositoryImplementation.save(newCustomer);
                     System.out.println("****************************************");
                     System.out.println("New customer created with ID " + newCustomer.id());
                     break;
@@ -106,7 +106,7 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                     System.out.print("Enter customer ID: ");
                     id = scanner.nextInt();
                     scanner.nextLine(); // consume newline
-                    customer = customerService.findById(id);
+                    customer = customerRepositoryImplementation.findById(id);
                     if (customer == null) {
                         System.out.println("Customer not found");
                     } else {
@@ -131,9 +131,9 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                         city = scanner.nextLine();
                         city = city.isEmpty() ? customer.city() : city;
 
-                        System.out.print("State [" + customer.stat() + "]: ");
+                        System.out.print("State [" + customer.state() + "]: ");
                         state = scanner.nextLine();
-                        state = state.isEmpty() ? customer.stat() : state;
+                        state = state.isEmpty() ? customer.state() : state;
 
                         System.out.print("Country [" + customer.country() + "]: ");
                         country = scanner.nextLine();
@@ -156,7 +156,7 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                         email = email.isEmpty() ? customer.email() : email;
 
                         Customer updatedCustomer = new Customer(id, firstName, lastName, company, address, city, state, country, postalCode, phone, fax, email);
-                        customerService.update(updatedCustomer);
+                        customerRepositoryImplementation.update(updatedCustomer);
                         System.out.println("****************************************");
                         System.out.println("Customer updated successfully");
                     }
