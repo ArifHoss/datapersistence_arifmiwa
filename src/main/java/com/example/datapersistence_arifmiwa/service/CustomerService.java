@@ -24,7 +24,7 @@ public class CustomerService implements CustomerRepo {
     }
 
     @Override
-    public Customer findById(int id) {
+    public Customer findById(Integer id) {
         String sql = "SELECT * FROM customer WHERE customer_id = ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{id}, new CustomerMapper());
 
@@ -55,7 +55,7 @@ public class CustomerService implements CustomerRepo {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(Integer id) {
         String sql = "DELETE FROM customer WHERE customer_id = ?";
         jdbcTemplate.update(sql, id);
     }

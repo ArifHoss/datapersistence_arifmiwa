@@ -1,22 +1,18 @@
 package com.example.datapersistence_arifmiwa.repository;
 
 import com.example.datapersistence_arifmiwa.exception.CustomIllegalStateException;
-import com.example.datapersistence_arifmiwa.model.Customer;
 
 import java.util.List;
 
 public interface CrudRepository <T,U>{
-    List<Customer> findAll();
+    List<T> findAll();
 
-    Customer findById(int id) throws CustomIllegalStateException;
+    T findById(U id) throws CustomIllegalStateException;
 
-    Customer findByName(String name);
 
-    List<Customer> findAllWithLimit(int limit, int offset);
+    void save(T object);
 
-    void save(Customer customer);
+    void update(T object);
 
-    void update(Customer customer);
-
-    void delete(int id);
+    void delete(U id);
 }
