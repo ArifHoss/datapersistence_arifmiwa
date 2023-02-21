@@ -89,7 +89,24 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
     @Override
     public void save(Customer customer) {
         String sql = "INSERT INTO customer (first_name, last_name, company, address, city, state, country, postal_code, phone, fax, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-//        jdbcTemplate.update(sql, customer.first_name(), customer.last_name(), customer.company(), customer.address(), customer.city(), customer.stat(), customer.country(), customer.postal_code(), customer.phone(), customer.fax(), customer.email());
+        try (Connection connection = DriverManager.getConnection(url, username, password)){
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, customer.first_name());
+            statement.setString(2, customer.last_name());
+            statement.setString(3, customer.company());
+            statement.setString(4, customer.address());
+            statement.setString(5, customer.city());
+            statement.setString(6, customer.state());
+            statement.setString(7, customer.country());
+            statement.setString(8, customer.postal_code());
+            statement.setString(9, customer.phone());
+            statement.setString(10, customer.fax());
+            statement.setString(11, customer.email());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
