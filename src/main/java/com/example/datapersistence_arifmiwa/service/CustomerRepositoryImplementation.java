@@ -91,6 +91,7 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
         return customers;
     }
 
+
     @Override
     public void save(Customer customer) {
         String sql = "INSERT INTO customer (first_name, last_name,country, postal_code, phone, fax, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -147,6 +148,74 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
         }
     }
 
+
+    @Override
+    public String getCountryWithMostCustomers() {
+        String sql = "SELECT MAX(country)  FROM customer";
+        String country = null;
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet result = statement.getResultSet();
+            while (result.next()) {
+                Customer customer = new CustomerMapper().mapRow(result, result.getRow());
+                assert customer != null;
+                country = customer.getCountry();
+//                System.out.println("Country with most customers: "+country);
+            }
+            return country;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns the most popular genre for a given customer based on their purchase history.
+     * If there is a tie for the most popular genre, all genres with the same highest count are returned.
+     *
+     * @param customerId the ID of the customer to search for
+     * @return a list of the most popular genres for the customer, or an empty list if the customer has no purchases
+     */
+    @Override
+    public List<String> getMostPopularGenres(int customerId) {
+        String sql = "SELECT ge.name, COUNT(*) as frequency " +
+                "FROM invoice inv " +
+                "JOIN invoice_line inv_line ON inv_line.invoice_id = inv.invoice_id " +
+                "JOIN track tr ON tr.track_id = inv_line.track_id " +
+                "JOIN genre ge ON ge.genre_id = tr.genre_id " +
+                "WHERE inv.customer_id = ? " +
+                "GROUP BY ge.name " +
+                "HAVING COUNT(*) >= ALL (" +
+                "  SELECT COUNT(*) " +
+                "  FROM invoice inv2 " +
+                "  JOIN invoice_line inv_line2 ON inv_line2.invoice_id = inv2.invoice_id " +
+                "  JOIN track tr2 ON tr2.track_id = inv_line2.track_id " +
+                "  JOIN genre ge2 ON ge2.genre_id = tr2.genre_id " +
+                "  WHERE inv2.customer_id = ? " +
+                "  GROUP BY ge2.name" +
+                ")";
+        List<String> genres = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, customerId);
+            statement.setInt(2, customerId);
+            ResultSet resultSet = statement.executeQuery();
+            int highestCount = 0;
+            while (resultSet.next()) {
+                String genreName = resultSet.getString("name");
+                int genreCount = resultSet.getInt("frequency");
+                if (genreCount > highestCount) {
+                    genres.clear();
+                    genres.add(genreName);
+                    highestCount = genreCount;
+                } else if (genreCount == highestCount) {
+                    genres.add(genreName);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return genres;
+    }
 
 
     private Customer findACustomerById(Integer id) {
