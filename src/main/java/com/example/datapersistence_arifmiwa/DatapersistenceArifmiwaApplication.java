@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 @SpringBootApplication
 public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
@@ -20,6 +21,7 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         SpringApplication.run(DatapersistenceArifmiwaApplication.class, args);
+
     }
 
 
@@ -37,7 +39,9 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
             System.out.println("4. List customers with limit and offset");
             System.out.println("5. Create a new customer");
             System.out.println("6. Update an existing customer");
-            System.out.println("7. Delete a customer");
+            System.out.println("7. Country with most customer");
+            System.out.println("9. Customer with max genre");
+            System.out.println("10. Delete a customer");
             System.out.println("0. Exit");
             System.out.println("****************************************");
             System.out.print("Enter your choice: ");
@@ -54,6 +58,7 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                 case 2:
                     System.out.print("Enter customer ID: ");
                     int id = scanner.nextInt();
+                    scanner.nextLine();
                     Customer customer = customerRepositoryImplementation.findById(id);
                     System.out.println("****************************************");
                     System.out.println(customer);
@@ -61,9 +66,9 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                 case 3:
                     System.out.print("Enter customer name: ");
                     String name = scanner.nextLine();
-                    customer = customerRepositoryImplementation.findByName(name);
+                    Set<Customer> customers1 = customerRepositoryImplementation.findByName(name);
                     System.out.println("****************************************");
-                    System.out.println(customer);
+                    customers1.forEach(System.out::println);
                     break;
                 case 4:
                     System.out.print("Enter limit: ");
@@ -97,10 +102,10 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                     String fax = scanner.nextLine();
                     System.out.print("Enter email: ");
                     String email = scanner.nextLine();
-                    Customer newCustomer = new Customer(0, firstName, lastName, company, address, city, state, country, postalCode, phone, fax, email);
+                    Customer newCustomer = new Customer(firstName, lastName, country, postalCode, phone, fax, email);
                     customerRepositoryImplementation.save(newCustomer);
                     System.out.println("****************************************");
-                    System.out.println("New customer created with ID " + newCustomer.id());
+                    System.out.println("New customer '" + newCustomer.getFirst_name() + " " + newCustomer.getLast_name() + "' is created!");
                     break;
                 case 6:
                     System.out.print("Enter customer ID: ");
@@ -111,56 +116,63 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                         System.out.println("Customer not found");
                     } else {
                         System.out.println("Enter new customer information:");
-                        System.out.print("First name [" + customer.first_name() + "]: ");
+                        System.out.print("First name [" + customer.getFirst_name() + "]: ");
                         firstName = scanner.nextLine();
-                        firstName = firstName.isEmpty() ? customer.first_name() : firstName;
+                        firstName = firstName.isEmpty() ? customer.getFirst_name() : firstName;
 
-                        System.out.print("Last name [" + customer.last_name() + "]: ");
+                        System.out.print("Last name [" + customer.getLast_name() + "]: ");
                         lastName = scanner.nextLine();
-                        lastName = lastName.isEmpty() ? customer.last_name() : lastName;
+                        lastName = lastName.isEmpty() ? customer.getLast_name() : lastName;
 
-                        System.out.print("Company [" + customer.company() + "]: ");
-                        company = scanner.nextLine();
-                        company = company.isEmpty() ? customer.company() : company;
-
-                        System.out.print("Address [" + customer.address() + "]: ");
-                        address = scanner.nextLine();
-                        address = address.isEmpty() ? customer.address() : address;
-
-                        System.out.print("City [" + customer.city() + "]: ");
-                        city = scanner.nextLine();
-                        city = city.isEmpty() ? customer.city() : city;
-
-                        System.out.print("State [" + customer.state() + "]: ");
-                        state = scanner.nextLine();
-                        state = state.isEmpty() ? customer.state() : state;
-
-                        System.out.print("Country [" + customer.country() + "]: ");
+                        System.out.print("Country [" + customer.getCountry() + "]: ");
                         country = scanner.nextLine();
-                        country = country.isEmpty() ? customer.country() : country;
+                        country = country.isEmpty() ? customer.getCountry() : country;
 
-                        System.out.print("Postal code [" + customer.postal_code() + "]: ");
+                        System.out.print("Postal code [" + customer.getPostal_code() + "]: ");
                         postalCode = scanner.nextLine();
-                        postalCode = postalCode.isEmpty() ? customer.postal_code() : postalCode;
+                        postalCode = postalCode.isEmpty() ? customer.getPostal_code() : postalCode;
 
-                        System.out.print("Phone [" + customer.phone() + "]: ");
+                        System.out.print("Phone [" + customer.getPhone() + "]: ");
                         phone = scanner.nextLine();
-                        phone = phone.isEmpty() ? customer.phone() : phone;
+                        phone = phone.isEmpty() ? customer.getPhone() : phone;
 
-                        System.out.print("Fax [" + customer.fax() + "]: ");
+                        System.out.print("Fax [" + customer.getFax() + "]: ");
                         fax = scanner.nextLine();
-                        fax = fax.isEmpty() ? customer.fax() : fax;
+                        fax = fax.isEmpty() ? customer.getFax() : fax;
 
-                        System.out.print("Email [" + customer.email() + "]: ");
+                        System.out.print("Email [" + customer.getEmail() + "]: ");
                         email = scanner.nextLine();
-                        email = email.isEmpty() ? customer.email() : email;
+                        email = email.isEmpty() ? customer.getEmail() : email;
 
-                        Customer updatedCustomer = new Customer(id, firstName, lastName, company, address, city, state, country, postalCode, phone, fax, email);
+                        Customer updatedCustomer = new Customer(id, firstName, lastName, country, postalCode, phone, fax, email);
                         customerRepositoryImplementation.update(updatedCustomer);
                         System.out.println("****************************************");
                         System.out.println("Customer updated successfully");
                     }
                     break;
+                case 7:
+                    System.out.println("****************************************");
+                    customerRepositoryImplementation.getCountryWithMostCustomers();
+                    break;
+
+                case 9:
+                    System.out.println("****************************************");
+                    System.out.print("Enter customer ID: ");
+                    int id1 = scanner.nextInt();
+                    List<String> genre = customerRepositoryImplementation.getMostPopularGenres(id1);
+                    genre.forEach(System.out::println);
+
+                    break;
+                case 10:
+                    System.out.print("Enter customer ID: ");
+                    id = scanner.nextInt();
+                    scanner.nextLine();
+                    customerRepositoryImplementation.delete(id);
+                    System.out.println("****************************************");
+                    System.out.println("Deleted customer successfully");
+                    break;
+
+
                 default:
                     System.out.println("Wrong choice!");
             }
