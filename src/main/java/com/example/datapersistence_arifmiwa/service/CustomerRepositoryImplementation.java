@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class CustomerRepositoryImplementation implements CustomerRepository {
@@ -20,8 +22,8 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
 
     public CustomerRepositoryImplementation(
             @Value("${spring.datasource.url}") String url,
-            @Value("${spring.datasource.username}")String username,
-            @Value("${spring.datasource.password}")String password) {
+            @Value("${spring.datasource.username}") String username,
+            @Value("${spring.datasource.password}") String password) {
         this.url = url;
         this.username = username;
         this.password = password;
@@ -47,31 +49,21 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
 
     @Override
     public Customer findById(Integer id) {
-        String sql = "SELECT * FROM customer WHERE customer_id = ?";
-        Customer customer = null;
-        try (Connection connection = DriverManager.getConnection(url, username, password)){
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-            customer = new CustomerMapper().mapRow(resultSet, resultSet.getRow());
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return customer;
+        return findACustomerById(id);
     }
 
+
     @Override
-    public Customer findByName(String name) {
-        String sql = "SELECT * FROM customer WHERE name = ?";
-        Customer customer = null;
-        try (Connection connection = DriverManager.getConnection(url, username, password)){
+    public Set<Customer> findByName(String name) { // Denna method fungerar ej
+        String sql = "SELECT * FROM customer WHERE first_name LIKE ?";
+//        String sql = "SELECT * FROM customer WHERE first_name LIKE ? ESCAPE '\\'";
+        Set<Customer> customer = null;
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, name);
+            statement.setString(1, "%" + name + "%");
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                customer = new CustomerMapper().mapRow(resultSet, resultSet.getRow());
+                customer = Collections.singleton(new CustomerMapper().mapRow(resultSet, resultSet.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -82,26 +74,35 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
     @Override
     public List<Customer> findAllWithLimit(int limit, int offset) {
         String sql = "SELECT * FROM customer ORDER BY customer_id LIMIT ? OFFSET ?";
-//        return jdbcTemplate.query(sql, new Object[]{limit, offset}, new CustomerMapper());
-        return null;
+
+        List<Customer> customers = new ArrayList<>();
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, limit);
+            statement.setInt(2, offset);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Customer customer = new CustomerMapper().mapRow(resultSet, resultSet.getRow());
+                customers.add(customer);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return customers;
     }
 
     @Override
     public void save(Customer customer) {
-        String sql = "INSERT INTO customer (first_name, last_name, company, address, city, state, country, postal_code, phone, fax, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection connection = DriverManager.getConnection(url, username, password)){
+        String sql = "INSERT INTO customer (first_name, last_name,country, postal_code, phone, fax, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, customer.first_name());
-            statement.setString(2, customer.last_name());
-            statement.setString(3, customer.company());
-            statement.setString(4, customer.address());
-            statement.setString(5, customer.city());
-            statement.setString(6, customer.state());
-            statement.setString(7, customer.country());
-            statement.setString(8, customer.postal_code());
-            statement.setString(9, customer.phone());
-            statement.setString(10, customer.fax());
-            statement.setString(11, customer.email());
+            statement.setString(1, customer.getFirst_name());
+            statement.setString(2, customer.getLast_name());
+            statement.setString(3, customer.getCountry());
+            statement.setString(4, customer.getPostal_code());
+            statement.setString(5, customer.getPhone());
+            statement.setString(6, customer.getFax());
+            statement.setString(7, customer.getEmail());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -111,14 +112,57 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
 
     @Override
     public void update(Customer customer) {
-        String sql = "UPDATE customer SET first_name = ?, last_name = ?, company = ?, address = ?, city = ?, state = ?, country = ?, postal_code = ?, phone = ?, fax = ?, email = ? WHERE customer_id = ?";
+//        Customer customer = findACustomerById(id);
+        String sql = "UPDATE customer SET first_name = ?, last_name = ?, country = ?, postal_code = ?, phone = ?, fax = ?, email = ? WHERE customer_id = ?";
 //        jdbcTemplate.update(sql, customer.first_name(), customer.last_name(), customer.company(), customer.address(), customer.city(), customer.stat(), customer.country(), customer.postal_code(), customer.phone(), customer.fax(), customer.email(), customer.id());
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, customer.getFirst_name());
+            statement.setString(2, customer.getLast_name());
+            statement.setString(3, customer.getCountry());
+            statement.setString(4, customer.getPostal_code());
+            statement.setString(5, customer.getPhone());
+            statement.setString(6, customer.getFax());
+            statement.setString(7, customer.getEmail());
+            statement.setInt(8, customer.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void delete(Integer id) {
         String sql = "DELETE FROM customer WHERE customer_id = ?";
-//        jdbcTemplate.update(sql, id);
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new IllegalArgumentException("No customer with id " + id + " found");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+    private Customer findACustomerById(Integer id) {
+        String sql = "SELECT * FROM customer WHERE customer_id = ?";
+        Customer customer = null;
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                customer = new CustomerMapper().mapRow(resultSet, resultSet.getRow());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return customer;
     }
 
 }
