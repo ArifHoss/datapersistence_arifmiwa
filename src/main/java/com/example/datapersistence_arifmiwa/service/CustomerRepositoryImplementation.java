@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class CustomerRepositoryImplementation implements CustomerRepository {
@@ -54,21 +51,21 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
 
 
     @Override
-    public Set<Customer> findByName(String name) { // Denna method fungerar ej
+    public Set<Customer> findByName(String name) {
         String sql = "SELECT * FROM customer WHERE first_name LIKE ?";
-//        String sql = "SELECT * FROM customer WHERE first_name LIKE ? ESCAPE '\\'";
-        Set<Customer> customer = null;
+//        String sql = "SELECT * FROM customers WHERE first_name LIKE ? ESCAPE '\\'";
+        Set<Customer> customers = new HashSet<>();
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, "%" + name + "%");
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                customer = Collections.singleton(new CustomerMapper().mapRow(resultSet, resultSet.getRow()));
+                customers.add(new CustomerMapper().mapRow(resultSet, resultSet.getRow()));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return customer;
+        return customers;
     }
 
     @Override
