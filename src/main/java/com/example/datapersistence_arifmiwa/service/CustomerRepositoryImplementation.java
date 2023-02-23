@@ -2,6 +2,7 @@ package com.example.datapersistence_arifmiwa.service;
 
 
 import com.example.datapersistence_arifmiwa.model.Customer;
+import com.example.datapersistence_arifmiwa.model.CustomerGenre;
 import com.example.datapersistence_arifmiwa.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -173,7 +174,7 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
      * @return a list of the most popular genres for the customer, or an empty list if the customer has no purchases
      */
     @Override
-    public List<String> getMostPopularGenres(int customerId) {
+    public CustomerGenre getMostPopularGenres(int customerId) {
         String sql = "SELECT ge.name, COUNT(*) as frequency " +
                 "FROM invoice inv " +
                 "JOIN invoice_line inv_line ON inv_line.invoice_id = inv.invoice_id " +
@@ -211,7 +212,7 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return genres;
+        return new CustomerGenre(customerId, genres);
     }
 
 

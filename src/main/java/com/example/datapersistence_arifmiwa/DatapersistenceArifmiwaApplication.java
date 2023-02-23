@@ -1,6 +1,7 @@
 package com.example.datapersistence_arifmiwa;
 
 import com.example.datapersistence_arifmiwa.model.Customer;
+import com.example.datapersistence_arifmiwa.model.CustomerGenre;
 import com.example.datapersistence_arifmiwa.service.CustomerRepositoryImplementation;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -159,8 +160,8 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                     System.out.println("****************************************");
                     System.out.print("Enter customer ID: ");
                     int id1 = scanner.nextInt();
-                    List<String> genre = customerRepositoryImplementation.getMostPopularGenres(id1);
-                    genre.forEach(System.out::println);
+                    CustomerGenre genre = customerRepositoryImplementation.getMostPopularGenres(id1);
+                    System.out.println("Most Popular Genre: " + genre);
 
                     break;
                 case 10:
