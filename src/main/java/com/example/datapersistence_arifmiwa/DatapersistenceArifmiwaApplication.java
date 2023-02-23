@@ -1,7 +1,9 @@
 package com.example.datapersistence_arifmiwa;
 
 import com.example.datapersistence_arifmiwa.model.Customer;
+import com.example.datapersistence_arifmiwa.model.CustomerCountry;
 import com.example.datapersistence_arifmiwa.model.CustomerGenre;
+import com.example.datapersistence_arifmiwa.model.CustomerSpender;
 import com.example.datapersistence_arifmiwa.service.CustomerRepositoryImplementation;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -41,6 +43,7 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
             System.out.println("5. Create a new customer");
             System.out.println("6. Update an existing customer");
             System.out.println("7. Country with most customer");
+            System.out.println("8. Customer who is the highest spender? ");
             System.out.println("9. Customer with max genre");
             System.out.println("10. Delete a customer");
             System.out.println("0. Exit");
@@ -153,7 +156,14 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                     break;
                 case 7:
                     System.out.println("****************************************");
-                    customerRepositoryImplementation.getCountryWithMostCustomers();
+                    CustomerCountry customerCountry = customerRepositoryImplementation.getCountryWithMostCustomers();
+                    System.out.println(customerCountry);
+                    break;
+
+                    case 8:
+                    System.out.println("****************************************");
+                        CustomerSpender customerSpender = customerRepositoryImplementation.customerHasHighestSpender();
+                    System.out.println(customerSpender);
                     break;
 
                 case 9:

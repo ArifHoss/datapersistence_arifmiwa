@@ -2,9 +2,12 @@ package com.example.datapersistence_arifmiwa.service;
 
 
 import com.example.datapersistence_arifmiwa.model.Customer;
+import com.example.datapersistence_arifmiwa.model.CustomerCountry;
 import com.example.datapersistence_arifmiwa.model.CustomerGenre;
+import com.example.datapersistence_arifmiwa.model.CustomerSpender;
 import com.example.datapersistence_arifmiwa.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
@@ -146,25 +149,57 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
         }
     }
 
-
+    // Return the country with the most customers.
     @Override
-    public String getCountryWithMostCustomers() {
-        String sql = "SELECT MAX(country)  FROM customer";
+    public CustomerCountry getCountryWithMostCustomers() {
+        String sql = "SELECT COUNT(*) AS count, country FROM customer GROUP BY country ORDER BY count DESC LIMIT 1";
+        List<Integer> customerIds = new ArrayList<>();
         String country = null;
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             PreparedStatement statement = connection.prepareStatement(sql);
-            ResultSet result = statement.getResultSet();
+            ResultSet result = statement.executeQuery();
             while (result.next()) {
-                Customer customer = new CustomerMapper().mapRow(result, result.getRow());
-                assert customer != null;
-                country = customer.getCountry();
-//                System.out.println("Country with most customers: "+country);
+                country = result.getString("country");
+                int count = result.getInt("count");
+                PreparedStatement customerStatement = connection.prepareStatement("SELECT customer_id FROM customer WHERE country = ?");
+                customerStatement.setString(1, country);
+                ResultSet customerResult = customerStatement.executeQuery();
+                System.out.println("Total customer: " + count);
+                while (customerResult.next()) {
+                    customerIds.add(customerResult.getInt("customer_id"));
+                }
             }
-            return country;
+            return new CustomerCountry(customerIds, country);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public CustomerSpender customerHasHighestSpender() {
+        String sql = "SELECT c.customer_id, SUM(i.total) AS total_spent " +
+                "FROM customer c " +
+                "JOIN invoice i ON c.customer_id = i.customer_id " +
+                "GROUP BY c.customer_id " +
+                "ORDER BY total_spent DESC " +
+                "LIMIT 1";
+
+        int totalSpent = 0;
+        int customerId = 0;
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet result = statement.executeQuery();
+            while (result.next()) {
+                totalSpent = result.getInt("total_spent");
+                customerId = result.getInt("customer_id");
+            }
+            return new CustomerSpender(customerId, totalSpent);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
     /**
      * Returns the most popular genre for a given customer based on their purchase history.
