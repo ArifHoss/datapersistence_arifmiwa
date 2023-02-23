@@ -7,11 +7,13 @@ import com.example.datapersistence_arifmiwa.model.CustomerGenre;
 import com.example.datapersistence_arifmiwa.model.CustomerSpender;
 import com.example.datapersistence_arifmiwa.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class CustomerRepositoryImplementation implements CustomerRepository {
@@ -32,8 +34,10 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
 
     @Override
     public List<Customer> findAll() {
-        List<Customer> customers = new ArrayList<>();
+
         String sql = "SELECT * FROM customer";
+
+        List<Customer> customers = new ArrayList<>();
 
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             Statement statement = connection.createStatement();
@@ -50,14 +54,27 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
 
     @Override
     public Customer findById(Integer id) {
-        return findACustomerById(id);
+        String sql = "SELECT * FROM customer WHERE customer_id = ?";
+        Customer customer = null;
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                customer = new CustomerMapper().mapRow(resultSet, resultSet.getRow());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return customer;
     }
 
 
     @Override
     public Set<Customer> findByName(String name) {
+
         String sql = "SELECT * FROM customer WHERE first_name LIKE ?";
-//        String sql = "SELECT * FROM customers WHERE first_name LIKE ? ESCAPE '\\'";
+
         Set<Customer> customers = new HashSet<>();
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -74,6 +91,7 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
 
     @Override
     public List<Customer> findAllWithLimit(int limit, int offset) {
+
         String sql = "SELECT * FROM customer ORDER BY customer_id LIMIT ? OFFSET ?";
 
         List<Customer> customers = new ArrayList<>();
@@ -114,9 +132,8 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
 
     @Override
     public void update(Customer customer) {
-//        Customer customer = findACustomerById(id);
+
         String sql = "UPDATE customer SET first_name = ?, last_name = ?, country = ?, postal_code = ?, phone = ?, fax = ?, email = ? WHERE customer_id = ?";
-//        jdbcTemplate.update(sql, customer.first_name(), customer.last_name(), customer.company(), customer.address(), customer.city(), customer.stat(), customer.country(), customer.postal_code(), customer.phone(), customer.fax(), customer.email(), customer.id());
 
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -149,7 +166,6 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
         }
     }
 
-    // Return the country with the most customers.
     @Override
     public CustomerCountry getCountryWithMostCustomers() {
         String sql = "SELECT COUNT(*) AS count, country FROM customer GROUP BY country ORDER BY count DESC LIMIT 1";
@@ -250,22 +266,6 @@ public class CustomerRepositoryImplementation implements CustomerRepository {
         return new CustomerGenre(customerId, genres);
     }
 
-
-    private Customer findACustomerById(Integer id) {
-        String sql = "SELECT * FROM customer WHERE customer_id = ?";
-        Customer customer = null;
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                customer = new CustomerMapper().mapRow(resultSet, resultSet.getRow());
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return customer;
-    }
 
 }
 

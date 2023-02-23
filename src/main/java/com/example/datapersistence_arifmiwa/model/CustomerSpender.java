@@ -25,9 +25,7 @@ public class CustomerSpender {
 
     @Override
     public String toString() {
-        return "CustomerSpender{" +
-                "customerId=" + customerId +
-                ", total=" + total +
-                '}';
+        return "CustomerID = " + customerId +
+                ", total-spent = " + total;
     }
 }
