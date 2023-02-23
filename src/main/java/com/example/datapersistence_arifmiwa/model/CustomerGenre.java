@@ -24,9 +24,7 @@ public class CustomerGenre {
 
     @Override
     public String toString() {
-        return "CustomerGenre{" +
-                "customerId=" + customerId +
-                ", genres=" + genres +
-                '}';
+        return "with customerId = " + customerId +
+                ",has most genres = " + genres;
     }
 }

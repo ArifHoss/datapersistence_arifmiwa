@@ -160,8 +160,12 @@ public class DatapersistenceArifmiwaApplication implements CommandLineRunner {
                     System.out.println("****************************************");
                     System.out.print("Enter customer ID: ");
                     int id1 = scanner.nextInt();
+                    Customer customer1 = customerRepositoryImplementation.findById(id1);
+                    firstName = customer1.getFirst_name();
+                    lastName= customer1.getLast_name();
                     CustomerGenre genre = customerRepositoryImplementation.getMostPopularGenres(id1);
-                    System.out.println("Most Popular Genre: " + genre);
+
+                    System.out.println(firstName+" "+lastName+" "+genre);
 
                     break;
                 case 10:
