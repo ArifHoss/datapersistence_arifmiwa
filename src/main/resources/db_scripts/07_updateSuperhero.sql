@@ -1,5 +1,3 @@
 UPDATE superhero
-SET name='Arif Parker',
-    alias='Spider hero',
-    origin='Tokyo'
+SET name='Arif Parker'
 WHERE id = 1;

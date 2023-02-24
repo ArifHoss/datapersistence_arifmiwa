@@ -9,8 +9,7 @@ CREATE TABLE IF NOT EXISTS superhero
 CREATE TABLE IF NOT EXISTS assistant
 (
     id   SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    superhero_id INTEGER REFERENCES superhero(id)
+    name VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS power

@@ -1,7 +1,5 @@
 DELETE
-FROM superhero_power
-WHERE power_id = 4
-  AND superhero_id = 1;
-
+FROM assistant
+WHERE name = 'Per Anderson';
 
 
